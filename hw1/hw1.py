@@ -124,8 +124,8 @@ class Account(ABC):
     """
 
     def __init__(self, account_number: int, balance: float = 0):
-        self._account_number = account_number
-        self._balance = float(balance)
+        self.account_number = account_number # got rid of an underscore
+        self.balance = float(balance)
 
     @abstractmethod
     def deposit(self, amount: float) -> None:
@@ -138,7 +138,6 @@ class Account(ABC):
         Returns: Nothing
         """
         self.balance += amount
-        raise NotImplementedError
 
     @abstractmethod
     def withdraw(self, amount: float) -> float:
@@ -152,7 +151,7 @@ class Account(ABC):
         """
 
         self.balance -= amount 
-        return self.balancebalance 
+        return amount
         raise NotImplementedError
 
     @property
@@ -181,9 +180,12 @@ class SavingsAccount(Account):
     def deposit(self, amount: float) -> None:
         return super().deposit(amount)
     def withdraw(self, amount: float) -> float:
-        if self.amount > self.balance:
+        if amount > self.balance:
             raise InsufficientFundsError("Insufficient funds")
         return super().withdraw(amount)
+    def balance(self, amount: float) -> float:
+        return super().balance(amount)
+
     
     
 
@@ -191,22 +193,28 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
     """
     Class to represent a checking account
     """
-    overdraft_limit: float
-    def __init__(self, account_number: int, balance: float = 0):
+    def __init__(self, account_number: int, balance: float = 0, overdraft_limit: float = 0):
         super().__init__(account_number, balance)
-        self.overdraft_limit = overdraft_limit #should I put this in super 
-        avalible_overdraft = overdraft_limit #why is this not accessed 
+        self.overdraft_limit = overdraft_limit 
+
     def deposit(self, amount: float) -> None:
         return super().deposit(amount)
+    
+    def available_overdraft(self, balance: float, overdraft_limit: float): #do I need to have balance or account in this ()
+        print("test")
+        return overdraft_limit + balance
+    
     def withdraw(self, amount: float) -> float:
-        if amount > balance:
-            if amount > self.avalible_overdraft + balance:
+        if amount > self.balance:
+            if amount > self.a_overdraft + balance:
                 raise InsufficientFundsError("Insufficient funds")
-            self.avalible_overdraft = self.overdraft_limit - (amount - balance)#need to update this variable to the function below 
+            self.available_overdraft = self.overdraft_limit + self.balance - amount#need to update this variable to the function below 
             balance = 0.0
         return super().withdraw(amount)
-    def avalible_overdraft(self): #do I need to have balance or account in this ()
-        return self.avalible_overdraft
+    
+    def balance(self, amount: float) -> float:
+        return super().balance(amount)
+
         
        
   

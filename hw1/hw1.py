@@ -28,9 +28,17 @@ def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
 
     Returns (dict): the words and counts of each word that starts with the given
     """
+    rv = {}
+    for strings in list_of_strings:
+        if starts_with in strings:
+            if strings not in rv:
+                rv[strings] = 1
+            elif strings in rv:
+                rv[strings] +=1
+    return rv
+        
+
     raise NotImplementedError("todo: count_words")
-
-
 class Board:
     """
     Class to represent a game board.
@@ -44,14 +52,16 @@ class Board:
     Methods:
         add_piece: add a piece represented by a string to the board
     """
+    board: list[list[Optional[str]]]
+    location_of_pieces: dict[Optional[str], list[tuple[int,int]]]
 
-    def __init__(self, rows, cols):
+    def __init__(self, rows: int, cols: int):
         self.rows = rows
         self.cols = cols
         self.board = [[None] * cols for _ in range(rows)]
         self.location_of_pieces = {}
 
-    def add_piece(self, piece, location):
+    def add_piece(self, piece: str, location: tuple[int,int]) -> bool:
         """
         Add a piece represented by a string to the board.
 
@@ -84,6 +94,15 @@ def get_all_paths(t: TreeNode) -> list[list[int]]:
 
     Returns (list): the list of paths
     """
+    all_paths: list[list[int]] = []
+    if not t.children:
+        return [[t.value]]
+    else:
+        for child_path in t.children:
+            for path in get_all_paths(child_path):
+                all_paths.append([t.value]+ path)
+    return all_paths
+
     raise NotImplementedError("todo: get_all_paths")
 
 class InsufficientFundsError(Exception):
@@ -103,6 +122,7 @@ class Account(ABC):
     Property:
         balance: the balance of the account
     """
+
     def __init__(self, account_number: int, balance: float = 0):
         self._account_number = account_number
         self._balance = float(balance)
@@ -117,6 +137,7 @@ class Account(ABC):
 
         Returns: Nothing
         """
+        self.balance += amount
         raise NotImplementedError
 
     @abstractmethod
@@ -129,6 +150,9 @@ class Account(ABC):
 
         Returns (float): Withdrawn amount.
         """
+
+        self.balance -= amount 
+        return self.balancebalance 
         raise NotImplementedError
 
     @property
@@ -139,6 +163,7 @@ class Account(ABC):
 
         Returns (float): Account balance
         """
+        return self.balance
         raise NotImplementedError
 
 
@@ -146,13 +171,46 @@ class SavingsAccount(Account):
     """
     Class to represent a savings account
     """
+    def __init__(self, account_number: int, balance: float = 0):
+        """
+        Insert Doct string
+        
+        """
+        super().__init__(account_number, balance)
 
+    def deposit(self, amount: float) -> None:
+        return super().deposit(amount)
+    def withdraw(self, amount: float) -> float:
+        if self.amount > self.balance:
+            raise InsufficientFundsError("Insufficient funds")
+        return super().withdraw(amount)
+    
+    
 
-class CheckingAccount(Account):
+class CheckingAccount(Account): #how do I get overdraft limit in here?
     """
     Class to represent a checking account
     """
-
+    overdraft_limit: float
+    def __init__(self, account_number: int, balance: float = 0):
+        super().__init__(account_number, balance)
+        self.overdraft_limit = overdraft_limit #should I put this in super 
+        avalible_overdraft = overdraft_limit #why is this not accessed 
+    def deposit(self, amount: float) -> None:
+        return super().deposit(amount)
+    def withdraw(self, amount: float) -> float:
+        if amount > balance:
+            if amount > self.avalible_overdraft + balance:
+                raise InsufficientFundsError("Insufficient funds")
+            self.avalible_overdraft = self.overdraft_limit - (amount - balance)#need to update this variable to the function below 
+            balance = 0.0
+        return super().withdraw(amount)
+    def avalible_overdraft(self): #do I need to have balance or account in this ()
+        return self.avalible_overdraft
+        
+       
+  
+    
 
 class HighYieldSavingsAccount(SavingsAccount):
     """

@@ -198,13 +198,16 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         Uses super deposit function
         takes in amount and modifies balance 
         """
-        if self.amount_overdrawn > self.overdraft_limit:
-            return super().deposit(0) 
+        if amount < self.amount_overdrawn: 
+            self.amount_overdrawn -= amount
+            return 0.0
+        if amount > self.amount_overdrawn:
+            return super().deposit(amount - (self.amount_overdrawn - self.overdraft_limit))
         return super().deposit(amount)
     @property
     def available_overdraft(self):
         """returns how much the acount can be overdrawn by"""
-        return (self.overdraft_limit - self.amount_overdrawn)
+        return self.overdraft_limit - self.amount_overdrawn
 
     def withdraw(self, amount: float) -> float:
         """withdraws from balance if there are sufficient funds and allows for 

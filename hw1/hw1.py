@@ -160,13 +160,12 @@ class SavingsAccount(Account):
     Class to represent a savings account
     """
     def __init__(self, account_number: int, balance: float = 0):
-        """Initializes variables from super"""
+        """See docstring in Account.__init__"""
         super().__init__(account_number, balance)
 
     def deposit(self, amount: float) -> None:
         """
-        Uses super deposit function
-        takes in amount and modifies balance 
+        See docstring in Account.deposity
         """
         return super().deposit(amount)
     def withdraw(self, amount: float) -> float:
@@ -178,11 +177,11 @@ class SavingsAccount(Account):
         if amount > self.balance:
             raise InsufficientFundsError("Insufficient funds")
         return super().withdraw(amount)
-    def balance(self, amount: float) -> float:
+    def balance(self) -> float:
         """
         Use Super balance function
         to return balance"""
-        return super().balance(amount)
+        return super().balance()
 class CheckingAccount(Account): #how do I get overdraft limit in here?
     """
     Class to represent a checking account
@@ -249,10 +248,13 @@ class HighYieldSavingsAccount(SavingsAccount):
                 ("Withdrawal exceeds minimum balance threshold")
         return super().withdraw(amount)
     def deposit(self, amount: float) -> None:
+        """See doc string in Account.deposity """
         return super().deposit(amount)
     def add_monthly_interest(self) -> None:
+        """Adds monthly intrest
+        Multiplies balance by monthly rate and updates balance"""
         interest_owed = self.balance * self.rate
         self.balance += interest_owed
     def balance(self, amount: float) -> float:
         """Uses super balance function"""
-        return super().super().balance(amount)
+        return super().balance(amount)

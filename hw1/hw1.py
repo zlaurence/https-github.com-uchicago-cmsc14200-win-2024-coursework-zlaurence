@@ -34,7 +34,7 @@ def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
                 rv[strings] = 1
             elif strings in rv:
                 rv[strings] +=1
-    return rv  
+    return rv
 class Board:
     """
     Class to represent a game board.
@@ -144,7 +144,7 @@ class Account(ABC):
         if self.balance <= amount:
             self.balance = 0
         else:
-            self.balance -= amount 
+            self.balance -= amount
         return amount
     @property
     @abstractmethod
@@ -191,12 +191,12 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
     def __init__(self, account_number: int, balance: float = 0,\
                   overdraft_limit: float = 0):
         super().__init__(account_number, balance)
-        self.overdraft_limit = overdraft_limit 
+        self.overdraft_limit = overdraft_limit
     def deposit(self, amount: float) -> None:
         """ 
         Uses super deposit function
         takes in amount and modifies balance 
-        """ 
+        """
         return super().deposit(amount)
     def available_overdraft(self):
         """returns how much the acount can be overdrawn by"""
@@ -212,7 +212,6 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
                 self.overdraft_limit + self.balance - amount
             self.balance = 0.0
         return super().withdraw(amount)
-    
     def balance(self, amount: float) -> float:
         """Uses super balance function"""
         return super().balance(amount)    

@@ -202,7 +202,9 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
             self.amount_overdrawn -= amount
             return 0.0
         if amount > self.amount_overdrawn:
-            return super().deposit(amount - (self.amount_overdrawn - self.overdraft_limit))
+            add = amount - self.amount_overdrawn
+            self.amount_overdrawn = 0
+            return super().deposit(add) 
         return super().deposit(amount)
     @property
     def available_overdraft(self):

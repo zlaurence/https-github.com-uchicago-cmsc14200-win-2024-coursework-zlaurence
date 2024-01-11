@@ -91,10 +91,9 @@ def get_all_paths(t: TreeNode) -> list[list[int]]:
     all_paths: list[list[int]] = []
     if not t.children:
         return [[t.value]]
-    else:
-        for child_path in t.children:
-            for path in get_all_paths(child_path):
-                all_paths.append([t.value]+ path)
+    for child_path in t.children:
+        for path in get_all_paths(child_path):
+            all_paths.append([t.value]+ path)
     return all_paths
 
 class InsufficientFundsError(Exception):
@@ -198,13 +197,13 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         Uses super deposit function
         takes in amount and modifies balance 
         """
-        if amount < self.amount_overdrawn: 
+        if amount < self.amount_overdrawn:
             self.amount_overdrawn -= amount
             return 0.0
         if amount > self.amount_overdrawn:
             add = amount - self.amount_overdrawn
             self.amount_overdrawn = 0
-            return super().deposit(add) 
+            return super().deposit(add)
         return super().deposit(amount)
     @property
     def available_overdraft(self):
@@ -216,9 +215,11 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         overdrafting
         """
         if amount > self.balance:
-            if amount > (self.overdraft_limit - self.amount_overdrawn + self.balance):
+            if amount > (self.overdraft_limit \
+                         - self.amount_overdrawn + self.balance):
                 raise InsufficientFundsError("Insufficient funds")
-            self.amount_overdrawn = self.amount_overdrawn + self.overdraft_limit + self.balance - amount
+            self.amount_overdrawn = self.amount_overdrawn + \
+                self.overdraft_limit + self.balance - amount
             self.balance = 0.0
         return super().withdraw(amount)
     def balance(self, amount: float) -> float:

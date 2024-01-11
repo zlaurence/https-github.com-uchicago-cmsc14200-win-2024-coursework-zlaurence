@@ -214,7 +214,7 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         return super().withdraw(amount)
     def balance(self, amount: float) -> float:
         """Uses super balance function"""
-        return super().balance(amount)    
+        return super().balance(amount)
 class HighYieldSavingsAccount(SavingsAccount):
     """
     Class to represent a high yeild savings account
@@ -234,7 +234,7 @@ class HighYieldSavingsAccount(SavingsAccount):
 
         Returns (float): Withdrawn amount.
         """
-        if self.min_balance >= self.balance - amount:
+        if self.min_balance > self.balance - amount:
             raise InsufficientFundsError\
                 ("Withdrawal exceeds minimum balance threshold")
         return super().withdraw(amount)

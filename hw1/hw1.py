@@ -16,7 +16,6 @@ from typing import Optional
 from abc import ABC, abstractmethod
 from tree import TreeNode
 
-
 def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
     """
     Find the words that start with a given substring and count the number of
@@ -35,10 +34,8 @@ def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
                 rv[strings] = 1
             elif strings in rv:
                 rv[strings] +=1
-    return rv
-        
+    return rv  
 
-    raise NotImplementedError("todo: count_words")
 class Board:
     """
     Class to represent a game board.
@@ -74,7 +71,6 @@ class Board:
             False otherwise
         """
         row, col = location
-
         if self.board[row][col] is None:
             self.board[row][col] = piece
             if piece in self.location_of_pieces:
@@ -83,7 +79,6 @@ class Board:
                 self.location_of_pieces[piece] = [location]
             return True
         return False
-
 
 def get_all_paths(t: TreeNode) -> list[list[int]]:
     """
@@ -102,8 +97,6 @@ def get_all_paths(t: TreeNode) -> list[list[int]]:
             for path in get_all_paths(child_path):
                 all_paths.append([t.value]+ path)
     return all_paths
-
-    raise NotImplementedError("todo: get_all_paths")
 
 class InsufficientFundsError(Exception):
     """
@@ -167,7 +160,6 @@ class Account(ABC):
         return self.balance
         raise NotImplementedError
 
-
 class SavingsAccount(Account):
     """
     Class to represent a savings account
@@ -197,14 +189,12 @@ class SavingsAccount(Account):
         to return balance"""
         return super().balance(amount)
 
-    
-    
-
 class CheckingAccount(Account): #how do I get overdraft limit in here?
     """
     Class to represent a checking account
     """
-    def __init__(self, account_number: int, balance: float = 0, overdraft_limit: float = 0):
+    def __init__(self, account_number: int, balance: float = 0,\
+                  overdraft_limit: float = 0):
         super().__init__(account_number, balance)
         self.overdraft_limit = overdraft_limit 
 
@@ -226,7 +216,8 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         if amount > self.balance:
             if amount > self.overdraft_limit + self.balance:
                 raise InsufficientFundsError("Insufficient funds")
-            self.available_overdraft = self.overdraft_limit + self.balance - amount#need to update this variable to the function below 
+            self.available_overdraft = \
+                self.overdraft_limit + self.balance - amount
             self.balance = 0.0
         return super().withdraw(amount)
     
@@ -235,15 +226,12 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
         return super().balance(amount)
 
         
-       
-  
-    
-
 class HighYieldSavingsAccount(SavingsAccount):
     """
     Class to represent a high yeild savings account
     """
-    def __init__(self, account_number: int, balance: float = 0, min_balance: float = 0, rate: float = 0):
+    def __init__(self, account_number: int, balance: float = 0,\
+                  min_balance: float = 0, rate: float = 0):
         """Initializes variables from super"""
         super().__init__(account_number, balance)
         self.min_balance = min_balance
@@ -258,7 +246,8 @@ class HighYieldSavingsAccount(SavingsAccount):
         Returns (float): Withdrawn amount.
         """
         if self.min_balance >= self.balance - amount:
-            raise InsufficientFundsError("Withdrawal exceeds minimum balance threshold")
+            raise InsufficientFundsError\
+                ("Withdrawal exceeds minimum balance threshold")
         return super().withdraw(amount)
     def deposit(self, amount: float) -> None:
         return super().deposit(amount)

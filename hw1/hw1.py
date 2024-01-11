@@ -35,7 +35,6 @@ def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
             elif strings in rv:
                 rv[strings] +=1
     return rv  
-
 class Board:
     """
     Class to represent a game board.
@@ -147,8 +146,6 @@ class Account(ABC):
         else:
             self.balance -= amount 
         return amount
-        raise NotImplementedError
-
     @property
     @abstractmethod
     def balance(self) -> float:
@@ -159,7 +156,6 @@ class Account(ABC):
         """
         return self.balance
         raise NotImplementedError
-
 class SavingsAccount(Account):
     """
     Class to represent a savings account
@@ -188,7 +184,6 @@ class SavingsAccount(Account):
         Use Super balance function
         to return balance"""
         return super().balance(amount)
-
 class CheckingAccount(Account): #how do I get overdraft limit in here?
     """
     Class to represent a checking account
@@ -197,18 +192,15 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
                   overdraft_limit: float = 0):
         super().__init__(account_number, balance)
         self.overdraft_limit = overdraft_limit 
-
     def deposit(self, amount: float) -> None:
         """ 
         Uses super deposit function
         takes in amount and modifies balance 
         """ 
         return super().deposit(amount)
-    
     def available_overdraft(self):
         """returns how much the acount can be overdrawn by"""
         return self.overdraft_limit
-    
     def withdraw(self, amount: float) -> float:
         """withdraws from balance if there are sufficient funds and allows for 
         overdrafting
@@ -223,9 +215,7 @@ class CheckingAccount(Account): #how do I get overdraft limit in here?
     
     def balance(self, amount: float) -> float:
         """Uses super balance function"""
-        return super().balance(amount)
-
-        
+        return super().balance(amount)    
 class HighYieldSavingsAccount(SavingsAccount):
     """
     Class to represent a high yeild savings account

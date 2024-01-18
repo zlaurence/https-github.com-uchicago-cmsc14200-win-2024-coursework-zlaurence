@@ -27,10 +27,13 @@ class StrNode(StrExp):
     def __init__(self, s: str):
         self.s = s
         #consider using Super to get Strexp
-    def is_constant(self) -> bool:
-        return True
+
     def num_nodes(self) -> int:
-        return 1
+        return 1 + self.left.num_nodes + self.right.num_nodes
+    def is_constant(self) -> bool:
+        if type(self.s) == str:
+            return True
+        
     def eval(self) -> str:
         return self.s
         #split into different classes concat slice
@@ -56,6 +59,10 @@ class Concat(StrExp):
         s1_value = self.s1.eval()
         s2_value = self.s2.eval()
         return s1_value + s2_value
+    def __str__(self) -> str:
+        s1_value = str(self.s1)
+        s2_value = str(self.s2)
+        return (s1_value)+ (s2_value)
 
 
 class Slice(StrExp):
@@ -72,8 +79,7 @@ class Slice(StrExp):
         self.low = low 
         self.high = high
         self.step = step
-        
-    def Slice(self) -> str:
+    def eval(self) -> str:
         return self.s[self.low: self.high: self.step]
 
 
@@ -88,8 +94,8 @@ class Replace(StrExp):
         self.s = s
         self.badstr = badstr 
         self.newstr = newstr
-    def replace(self) -> str:
-        return  self.replace(self.badstr, self.newstr)
+    def eval(self) -> str:
+        return  self.s.replace(str(self.badstr), str(self.newstr))
 
 #### Task 2 ####
 

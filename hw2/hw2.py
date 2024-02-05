@@ -43,7 +43,6 @@ class Concat(StrExp):
     """
     Class to represent the "concatenation" operator
     """
-    #must evaluate until s1 and s2 are just strings 
     s1: "StrNode|Concat|Slice|Replace"
     s2: "StrNode|Concat|Slice|Replace"
     
@@ -122,17 +121,17 @@ def valid_bst(tree: BaseBST) -> bool:
     if tree.is_empty:
         return True
 
-    stack = [(tree, float('-inf'), float('inf'))]
+    stack = [(tree, None, None)]  
 
     while stack:
         node, lower, upper = stack.pop()
-        if not lower < node.value < upper:
+        if (lower is not None and node.value <= lower) or \
+            (upper is not None and node.value >= upper):
             return False
         if not node.right.is_empty:
             stack.append((node.right, node.value, upper))
         if not node.left.is_empty:
             stack.append((node.left, lower, node.value))
-
     return True
 
 #### Task 3 ####
@@ -361,9 +360,12 @@ class Board:
     @property
     def dominating(self) -> Optional[str]:
         """
-        Returns the piece that is dominating (i.e., has the most number 
-        of pieces on the board).
-        If there is no dominating piece, or if there is a tie, return None.
+        This function returns the peice that is dominating the most, if there
+        is one.
+
+        Input:
+            Self
+        Return: String or None
         """
         piece_count = {}
         for row in self.board:

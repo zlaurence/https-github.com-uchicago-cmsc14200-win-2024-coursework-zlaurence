@@ -23,23 +23,21 @@ class StrNode(StrExp):
     Class to represent a String node in an expression tree
     """
     s: str 
-
     def __init__(self, s: str):
         self.s = s
-        #consider using Super to get Strexp
+
+    def is_const(self) -> bool:
+        return True
 
     def num_nodes(self) -> int:
-        return 1 + self.left.num_nodes + self.right.num_nodes
-    def is_constant(self) -> bool:
-        if type(self.s) == str:
-            return True
-        
+        return 1
+
     def eval(self) -> str:
         return self.s
-        #split into different classes concat slice
-        #treat operators like node parents
+
     def __str__(self) -> str:
-        return str(self.s)
+        return f'"{self.s}"'
+
 
 class Concat(StrExp):
     """
@@ -48,22 +46,19 @@ class Concat(StrExp):
     #must evaluate until s1 and s2 are just strings 
     s1: "StrNode|Concat|Slice|Replace"
     s2: "StrNode|Concat|Slice|Replace"
-
-    def __init__(self, s1: "StrNode|Concat|Slice|Replace", s2:"StrNode|Concat|Slice|Replace") -> None:
+    
+    def __init__(self, s1: "StrNode|Concat|Slice|Replace", \
+                 s2:"StrNode|Concat|Slice|Replace") -> None:
         self.s1 = s1
         self.s2 = s2
     def is_const(self) -> bool:
-        return False
+       return False
     def eval(self) -> str:
-       # if not self.s1.children
-        s1_value = self.s1.eval()
-        s2_value = self.s2.eval()
-        return s1_value + s2_value
+       return self.s1.eval() + self.s2.eval()
+    def num_nodes(self) -> int:
+        return 1 + self.s1.num_nodes() + self.s2.num_nodes()
     def __str__(self) -> str:
-        s1_value = str(self.s1)
-        s2_value = str(self.s2)
-        return (s1_value)+ (s2_value)
-
+       return f'Concat({self.s1}, {self.s2})'
 
 class Slice(StrExp):
     """
@@ -74,13 +69,21 @@ class Slice(StrExp):
     high: int
     step: int
 
-    def __init__(self, s: "StrNode|Concat|Slice|Replace", low: int, high: int, step:int) -> None:
+    def __init__(self, s: "StrNode|Concat|Slice|Replace", \
+                 low: int, high: int, step:int) -> None:
         self.s = s
         self.low = low 
         self.high = high
         self.step = step
+    def is_const(self) -> bool:
+        return False
+    def num_nodes(self) -> int:
+        return 1 + self.s.num_nodes()
     def eval(self) -> str:
-        return self.s[self.low: self.high: self.step]
+        string_value = self.s.eval()
+        return string_value[self.low:self.high:self.step]
+    def __str__(self) -> str:
+        return f'Slice({self.s}, {self.low}, {self.high}, {self.step})'
 
 
 class Replace(StrExp):
@@ -90,13 +93,21 @@ class Replace(StrExp):
     s: "StrNode|Concat|Slice|Replace"
     badstr: "StrNode|Concat|Slice|Replace"
     newstr: "StrNode|Concat|Slice|Replace"
-    def __init__(self, s: "StrNode|Concat|Slice|Replace", badstr: "StrNode|Concat|Slice|Replace", newstr: "StrNode|Concat|Slice|Replace") -> None:
+    def __init__(self, s: "StrNode|Concat|Slice|Replace", badstr: \
+                 "StrNode|Concat|Slice|Replace", newstr: \
+                    "StrNode|Concat|Slice|Replace") -> None:
         self.s = s
         self.badstr = badstr 
         self.newstr = newstr
     def eval(self) -> str:
-        return  self.s.replace(str(self.badstr), str(self.newstr))
-
+        return self.s.eval().replace(self.badstr.eval(), self.newstr.eval())
+    def is_const(self) -> bool:
+        return False
+    def num_nodes(self) -> int:
+        return 1 + self.s.num_nodes() + self.badstr.num_nodes()\
+              + self.newstr.num_nodes()
+    def __str__(self) -> str:
+        return f"Replace({self.s}, {self.badstr}, {self.newstr})"
 #### Task 2 ####
 
 def valid_bst(tree: BaseBST) -> bool:
@@ -108,8 +119,21 @@ def valid_bst(tree: BaseBST) -> bool:
 
     Returns (bool): True if t is a properly-ordered BST, False otherwise
     """
-    raise NotImplementedError
+    if tree.is_empty:
+        return True
 
+    stack = [(tree, float('-inf'), float('inf'))]
+
+    while stack:
+        node, lower, upper = stack.pop()
+        if not lower < node.value < upper:
+            return False
+        if not node.right.is_empty:
+            stack.append((node.right, node.value, upper))
+        if not node.left.is_empty:
+            stack.append((node.left, lower, node.value))
+
+    return True
 
 #### Task 3 ####
 
@@ -156,7 +180,7 @@ class BSTEmptyOpt:
         """
         return None
 
-    def contains(self, n: int) -> bool:  # pylint: disable=unused-argument
+    def contains(self, n: int) -> bool:  
         """
         Determines whether a value is contained in the tree.
 
@@ -299,7 +323,8 @@ class Board:
         rows (int): number of rows
         cols (int): number of columns
         board (list): the game board
-        location_of_pieces (dictionary): the location of each piece on the board
+        location_of_pieces (dictionary): the location of each piece
+          on the board
 
     Methods:
         add_piece: add a piece represented by a string to the board
@@ -333,3 +358,24 @@ class Board:
         return False
 
     # Add your dominating property here
+    @property
+    def dominating(self) -> Optional[str]:
+        """
+        Returns the piece that is dominating (i.e., has the most number 
+        of pieces on the board).
+        If there is no dominating piece, or if there is a tie, return None.
+        """
+        piece_count = {}
+        for row in self.board:
+            for cell in row:
+                if cell:
+                    piece_count[cell] = piece_count.get(cell, 0) + 1
+
+        max_pieces = max(piece_count.values(), default=0)
+        max_pieces_list = [piece for piece, count in piece_count.items() \
+                           if count == max_pieces]
+        if len(max_pieces_list) == 1:
+            return max_pieces_list[0] 
+        else:
+            return None
+

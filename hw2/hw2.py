@@ -211,6 +211,7 @@ class BSTNodeOpt:
     value: int
     left: "BSTEmptyOpt | BSTNodeOpt"
     right: "BSTEmptyOpt | BSTNodeOpt"
+    
 
     def __init__(self, n: int,
                  left: "BSTEmptyOpt | BSTNodeOpt",
@@ -226,6 +227,8 @@ class BSTNodeOpt:
         self.value = n
         self.left = left
         self.right = right
+        self._span = (n, n)
+        self.update_span()
 
     @property
     def is_empty(self) -> bool:
@@ -254,6 +257,18 @@ class BSTNodeOpt:
         Returns: The height of the tree
         """
         return 1 + max(self.left.height, self.right.height)
+    def update_span(self):
+        """
+        Updates the span for node
+        """
+        # Span of left and right children
+        left_span = self.left.span if not self.left.is_empty else \
+            (self.value, self.value)
+        right_span = self.right.span if not self.right.is_empty else \
+            (self.value, self.value)
+        # Update the current span
+        self._span = (min(left_span[0], self.value, right_span[0]), \
+                      max(left_span[1], self.value, right_span[1]))
 
     @property
     def span(self) -> Optional[tuple[int, int]]:
@@ -261,15 +276,7 @@ class BSTNodeOpt:
         Returns: A tuple with the min and max value in the tree;
                  None for an empty tree
         """
-        left_span = self.left.span
-        right_span = self.right.span
-        min = self.value
-        max = self.value
-        if left_span is not None:
-            min = left_span[0]
-        if right_span is not None:
-            max = right_span[1]
-        return (min, max)
+        return self._span
 
     @property
     def balance_factor(self) -> int:
@@ -288,6 +295,8 @@ class BSTNodeOpt:
         Returns: True if the value is contained in the tree,
             False otherwise.
         """
+        if n < self._span[0] or n > self._span[1]:
+            return False
         if n < self.value:
             return self.left.contains(n)
         elif n > self.value:
@@ -305,11 +314,12 @@ class BSTNodeOpt:
         Returns: A new tree with the value inserted into it
         """
         if n < self.value:
-            return BSTNodeOpt(self.value, self.left.insert(n), self.right)
+            self.left = self.left.insert(n)
         elif n > self.value:
-            return BSTNodeOpt(self.value, self.left, self.right.insert(n))
-        else:
-            return self
+            self.right = self.right.insert(n)
+        
+        self.update_span()
+        return self
 
 
 #### Task 4 ####

@@ -141,6 +141,7 @@ class TreeFarm:
 
         Returns: nothing
         """
+        self.node_positions = {}
         levels = self.tree.height
         figheight = self.height - 2 * self.border
         figwidth = self.width - 3 * self.border - 2 * BUTTON_RADIUS
@@ -161,26 +162,113 @@ class TreeFarm:
         self._draw_tree(self.tree, self.border, self.border + figwidth,
                         self.border + NODE_RADIUS, levelskip)
 
+    
+    def is_bst(self, node=None, min_value=None, max_value=None) -> bool:
+        """
+        Checks if the binary tree is a BST
+
+        Parameters:
+            Node: BSTtreestub
+            min_value: Min val that node must be greater than
+            max_value: Max val that node must be less than
+
+        Returns:
+            True if the tree is a BST, False otherwise.
+        """
+        if node is None or isinstance(node, BSTEmpty):
+            return True
+
+        if (min_value is not None and node.value <= min_value) or \
+           (max_value is not None and node.value >= max_value):
+            return False
+
+        left_is_bst = self.is_bst(node.left, min_value, node.value)
+        right_is_bst = self.is_bst(node.right, node.value, max_value)
+
+        return left_is_bst and right_is_bst
+    
+    def get_node_at_pos(self, mouse_pos):
+        """
+        Finds the node at the given mouse position.
+
+        Parameters:
+            cordinates of mouse
+
+        Returns:
+            Node or none
+        """
+        for node, position in self.node_positions.items():
+            node_x, node_y = position
+            if (mouse_pos[0] - node_x) ** 2 + \
+               (mouse_pos[1] - node_y) ** 2 <= NODE_RADIUS ** 2:
+                return node
+        return None
+        
     def event_loop(self) -> None:
         """
-        Handles user interactions
+        Handles uses moves 
 
-        Parameters: none beyond self
+        Parameters:  self
 
-        Returns: nothing
-        """
+        Returns: Nothing, but has interface outputs
+        """       
+        selected_node: Optional[BSTNode] = None  
+
         while True:
-            # Process Pygame events
+            # Events
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    mouse_pos = event.pos
+
+                    for button_name, button_pos in self.buttons.items():
+                        if (mouse_pos[0]\
+                             - button_pos[0]) ** 2\
+                            + (mouse_pos[1] - button_pos[1])\
+                            ** 2 <= BUTTON_RADIUS ** 2:
+                            if button_name == "add-left":
+                                if self.tree.left is None:  
+                                    self.tree.left = BSTNode(0)  
+                                break
+                            elif button_name == "add-right":
+                                if self.tree.right is None:  
+                                    self.tree.right = BSTNode(0)  
+                                break
+                            if button_name == "delete" and selected_node:
+                                self.tree = \
+                                self.tree.delete(selected_node.value)
+                                selected_node = None
+                            elif button_name == "plus-one" and selected_node:
+                                selected_node.value += 1
+                            elif button_name == "sub-one" and selected_node:
+                                selected_node.value -= 1
                         
-            # Update the display
+                        
+                            break
+
+                    clicked_node = self.get_node_at_pos(mouse_pos) 
+                    #REALLY NEED TO FIGURE OUT CLICKER.PY!
+                    if clicked_node:
+                        if selected_node == clicked_node:
+                        # Deselecting
+                            selected_node = None
+                        else:
+                        # Selected 
+                            selected_node = clicked_node
+            bst_status = 'Y' if self.is_bst(self.tree) else 'N'
+            self.buttons['BST'] = (self.buttons['BST'][0], \
+                                   self.buttons['BST'][1], bst_status)
+            self.draw_window() 
+                        
+        # Update the display
             self.draw_window()
             pygame.display.update()
             self.clock.tick(24)
+
+
 
 
 if __name__ == "__main__":

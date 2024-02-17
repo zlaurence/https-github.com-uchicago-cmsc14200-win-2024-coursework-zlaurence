@@ -28,7 +28,21 @@ def like_component(g: Graph, src: str) -> set[str]:
     Returns:
       a set of strings, the labels of vertices in the component
     """
-    raise NotImplementedError
+    if src not in g.vertex_labels:
+        raise ValueError(f"The vertex {src} is not in the graph.")
+
+    like = set([src])
+    stack = [src]
+    value = g.get_value(src)
+
+    while stack:
+        vertex = stack.pop()
+        for neigh in g.out_neighbors(vertex):
+            if g.get_value(neigh) == value and neigh not in like:
+                like.add(neigh)
+                stack.append(neigh)
+
+    return like
 
 Stone = Literal['BLACK']|Literal['WHITE']
 
@@ -102,4 +116,27 @@ def go_graph(gb: GoBoard) -> Graph:
     Returns:
       a graph as described
     """
-    raise NotImplementedError
+    size = gb.size
+    graph = AdjacencyListDigraph([f'{col}:{row}' for col in range(size) \
+                                  for row in range(size)])
+    
+    for col in range(size):
+        for row in range(size):
+            
+            cur_label = f'{col}:{row}'
+            cur_value = gb.get(col, row)
+            graph.set_value(cur_label, cur_value)
+
+            
+            if col < size - 1:
+                r_label = f'{col + 1}:{row}'
+                graph.connect(cur_label, r_label)
+                graph.connect(r_label, cur_label)
+            
+           
+            if row < size - 1:
+                bot_label = f'{col}:{row + 1}'
+                graph.connect(cur_label, bot_label)
+                graph.connect(bot_label, cur_label)
+
+    return graph

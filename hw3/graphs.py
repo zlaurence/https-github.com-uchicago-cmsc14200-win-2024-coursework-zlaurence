@@ -16,7 +16,7 @@ class Graph(ABC):
 
         Returns: the number of vertices in the graph.
         """
-        return len(self._neighbors)
+        raise NotImplementedError
 
 
     @property
@@ -28,8 +28,7 @@ class Graph(ABC):
         Returns: the number of edges in the graph.
         """
 
-        return sum(len(neighbors) for neighbors in self._neighbors.values())
-
+        raise NotImplementedError
     @property
     @abstractmethod
     def vertex_labels(self) -> set[str]:
@@ -38,7 +37,7 @@ class Graph(ABC):
 
         Returns: the set of all vertex labels in the graph.
         """
-        return set(self._vertex_values.keys())
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -49,11 +48,7 @@ class Graph(ABC):
         Returns: the set of all edges in the graph. Each edge is a
         tuple of labels in (source, destination) order.
         """
-        edge_set = set()
-        for src, neighboors in self._neighbors.items():
-            for dst in neighboors:
-                edge_set.add((src,dst))
-        return edge_set
+        raise NotImplementedError
 
 
     @abstractmethod
@@ -70,8 +65,7 @@ class Graph(ABC):
         Raises:
             ValueError if src or dst not in the graph
         """
-        self._validate_vertices(src, dst)
-        pass
+        raise NotImplementedError
 
 
 
@@ -87,11 +81,7 @@ class Graph(ABC):
         Raises:
             ValueError if src or dst not in the graph
         """
-        if src not in self._neighbors:
-            raise ValueError("Source vertex not in the graph")
-        if dst not in self._neighbors:
-            raise ValueError("Destination vertex not in the graph")
-        return dst in self._neighbors.get(src, [])
+        raise NotImplementedError
 
     @abstractmethod
     def out_neighbors(self, src: str) -> set[str]:
@@ -108,7 +98,7 @@ class Graph(ABC):
         Raises:
             ValueError if src not in the graph
         """
-        return set(self._neighbors.get(src,[]))
+        raise NotImplementedError
 
     @abstractmethod
     def get_value(self, vertex: str) -> Any:
@@ -123,9 +113,7 @@ class Graph(ABC):
         Raises:
             ValueError if vertex not in the graph
         """
-        if vertex not in self._vertex_values:
-            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
-        return self._vertex_values.get(vertex)
+        raise NotImplementedError
 
     @abstractmethod
     def set_value(self, vertex: str, value: Any) -> None:
@@ -142,10 +130,7 @@ class Graph(ABC):
         Raises:
             ValueError if vertex not in the graph
         """
-        if vertex not in self._vertex_values:
-            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
-
-        self._vertex_values[vertex] = value
+        raise NotImplementedError
 
     @abstractmethod
     def to_adj_list(self) -> 'AdjacencyListDigraph':
@@ -156,7 +141,7 @@ class Graph(ABC):
 
         Returns: an AdjacencyListDigraph.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def to_adj_matrix(self) -> 'AdjacencyMatrixDigraph':
@@ -167,15 +152,8 @@ class Graph(ABC):
 
         Returns: an AdjacencyMatrixDigraph.
         """
-        pass #maybe have to fix
-    def _validate_vertices(self, src: str, dst: str):
-        """ Helper function, because Adjacent matrix digraph does not have
-         neighbors """
-        if src not in self._vertex_values:
-            raise ValueError(f"Source vertex {src} does not exist.")
-        if dst not in self._vertex_values:
-            raise ValueError(f"Destination vertex {dst} does not exist.")
-
+        raise NotImplementedError
+    
 
 class AdjacencyListDigraph(Graph):
     """ Adjacency list implementation of graphs """
@@ -193,33 +171,53 @@ class AdjacencyListDigraph(Graph):
        
     @property
     def num_vertices(self):
-       return super().num_vertices
+        return len(self._neighbors)
     @property
     def num_edges(self):
-        return super().num_edges
+        return sum(len(neigh) for neigh in self._neighbors.values())
     @property
     def vertex_labels(self):
-        return super().vertex_labels
+        return set(self._vertex_values.keys())
     @property
     def edges(self):
-        return super().edges
-    
+        edge_set = set()
+        for src, neigh in self._neighbors.items():
+            for dst in neigh:
+                edge_set.add((src,dst))
+        return edge_set
+
+
     def connect(self, src, dst):
-        super()._validate_vertices(src, dst)
+        if src not in self._vertex_values:
+            raise ValueError(f"Source vertex {src} does not exist.")
+        if dst not in self._vertex_values:
+            raise ValueError(f"Destination vertex {dst} does not exist.")
         self._neighbors[src].append(dst)
-    
+   
     def connected(self, src, dst):
-        return super().connected(src, dst)
+        if src not in self._neighbors:
+            raise ValueError("Source vertex not in the graph")
+        if dst not in self._neighbors:
+            raise ValueError("Destination vertex not in the graph")
+        return dst in self._neighbors.get(src, [])
+    
     def out_neighbors(self, src):
-       return super().out_neighbors(src)
+       return set(self._neighbors.get(src,[]))
+
     
     def get_value(self, vertex):
-        return super().get_value(vertex)
+        if vertex not in self._vertex_values:
+            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
+        return self._vertex_values.get(vertex)
     
     def set_value(self, vertex, value):
-       return super().set_value(vertex, value)
+        if vertex not in self._vertex_values:
+            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
+        self._vertex_values[vertex] = value
+
     def to_adj_list(self):
         return self
+    
     def to_adj_matrix(self):
         matrix_graph = AdjacencyMatrixDigraph(self.vertex_labels)
 
@@ -228,7 +226,6 @@ class AdjacencyListDigraph(Graph):
                 matrix_graph.connect(src, dst)
 
         return matrix_graph
-
 
 class AdjacencyMatrixDigraph(Graph):
     """ Adjacency matrix implementation of graphs """
@@ -240,15 +237,17 @@ class AdjacencyMatrixDigraph(Graph):
 
     def __init__(self, vertex_labels: list[str]):
         super().__init__()
-        self._labels_to_ints = vertex_labels
-        self._vertex_values = {label: None for label in vertex_labels}
-
-        self._labels_to_ints = {label: index for index, label in enumerate(vertex_labels)}
+        self._vertex_values = {}
+        self._labels_to_ints = {}
         self._ints_to_labels = vertex_labels
 
+        for index, label in enumerate(vertex_labels):
+            self._vertex_values[label] = None
+            self._labels_to_ints[label] = index
 
         size = len(vertex_labels)
         self._adjacency = [[False] * size for _ in range(size)]
+
 
     @property
     def num_vertices(self):
@@ -269,9 +268,9 @@ class AdjacencyMatrixDigraph(Graph):
     @property
     def edges(self):
         edge_set = set()
-        for i, row in enumerate(self._adjacency):
-            for j, connected in enumerate(row):
-                if connected:
+        for i, Rows in enumerate(self._adjacency):
+            for j, con in enumerate(Rows):
+                if con:
                     src = self._ints_to_labels[i]
                     dst = self._ints_to_labels[j]
                     edge_set.add((src, dst))
@@ -300,24 +299,31 @@ class AdjacencyMatrixDigraph(Graph):
 
         src_index = self._labels_to_ints[src]
         neighbors = set()
-        for j, connected in enumerate(self._adjacency[src_index]):
-            if connected:
+        for j, con in enumerate(self._adjacency[src_index]):
+            if con:
                 neighbors.add(self._ints_to_labels[j])
         return neighbors
 
     def get_value(self, vertex):
-       return super().get_value(vertex)
+       if vertex not in self._vertex_values:
+            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
+       return self._vertex_values.get(vertex)
+    
     def set_value(self, vertex, value):
-       return super().set_value(vertex, value)
+       if vertex not in self._vertex_values:
+            raise KeyError(f"Vertex '{vertex}' does not exist in the graph.")
+       self._vertex_values[vertex] = value
+
     def to_adj_list(self) -> 'AdjacencyListDigraph':
         adj_list_graph = AdjacencyListDigraph(self._ints_to_labels)
         for i, row in enumerate(self._adjacency):
             src = self._ints_to_labels[i]
-            for j, connected in enumerate(row):
-                if connected:
+            for j, con in enumerate(row):
+                if con:
                     dst = self._ints_to_labels[j]
-                    adj_list_graph.connect(src, dst) #fix
+                    adj_list_graph.connect(src, dst) 
         return adj_list_graph
+    
     def to_adj_matrix(self) -> 'AdjacencyMatrixDigraph':
         return self
     

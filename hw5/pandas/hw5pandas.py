@@ -33,7 +33,12 @@ def summarize_ride_by_date(divvy_df: pd.DataFrame) -> pd.DataFrame:
             - ride_date: Date of the ride
             - ride_count: Number of rides on that date
     """
-    raise NotImplementedError
+    divvy_df['started_at'] = pd.to_datetime(divvy_df['started_at'])
+    divvy_df['ride_date'] = divvy_df['started_at'].dt.date.astype(str)
+    summary_df = divvy_df.groupby('ride_date').size().reset_index(name='ride_count')
+    
+    return summary_df
+
 
 
 def merge_rides_and_weather(
@@ -56,7 +61,15 @@ def merge_rides_and_weather(
                 - temp_departure: Departure from normal temperature on that date
 
     """
-    raise NotImplementedError
+    if divvy_summary.index.name != 'ride_date':
+        divvy_summary.set_index('ride_date', inplace=True)
+    if weather_data.index.name != 'ride_date':
+        weather_data = weather_data.rename(columns={'calendar_date': 'ride_date'}).set_index('ride_date')
+    merged_data = divvy_summary.join(weather_data, how='outer')
+    expected_columns = ['ride_count', 'temp_max', 'temp_min', 'temp_avg', 'temp_departure']
+    merged_data = merged_data[expected_columns]
+
+    return merged_data
 
 
 def compute_correlation(
@@ -73,7 +86,8 @@ def compute_correlation(
     Returns:
         float: Correlation between the two variables
     """
-    raise NotImplementedError
+    correlation = merged_data[variable1].corr(merged_data[variable2])
+    return correlation
 
 
 # Bonus Plotting
